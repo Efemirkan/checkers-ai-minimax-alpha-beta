@@ -1,0 +1,27 @@
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Pytest
+.pytest_cache/
+
+# Virtual environments
+venv/
+.venv/
+
+# Environment files
+.env
+
+# OS/editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Archives
+*.zip
+
+# Word temporary files only
+~$*.docx
+~$*.doc
+plan/
