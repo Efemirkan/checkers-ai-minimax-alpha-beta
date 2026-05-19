@@ -14,7 +14,7 @@ def make_move(path, captures, regicide=False, promotes=False):
             }
 
 # Returns the directions
-# Direction represents changes in rows and cols
+# Direction represents changes in rows and cols (row,col)
 def movement_directions(piece):
 
     # Black moves down
@@ -28,8 +28,9 @@ def movement_directions(piece):
     return [(1, -1), (1, 1), (-1, -1), (-1, 1)]
 
 # To find NORMAL moves for one piece 
-def find_piece_normal_moves(board, row, col):
+def find_piece_normal_moves(board, move):
 
+    row, col = move["path"][-1] # Current position of the piece
     piece = board[row][col] # Determine the piece
     moves = [] # To store moves
 
@@ -51,7 +52,123 @@ def find_piece_normal_moves(board, row, col):
         # Check the piece to be promote on the row
         promotes = check_promote(piece, new_row)
 
-        # Append the possibke moves in the 'move' list
-        moves.append(make_move([(row, col), (new_row, new_col)], [], promotes=promotes))
+        # Create new move and append the possible moves in the 'move' list
+        new_move = make_move(move["path"] + [(new_row, new_col)], move["captures"], promotes=promotes)
+
+        moves.append(new_move)
 
     return moves
+
+# To find all CAPTUREmoves for one piece
+def find_piece_captures(board, move):
+
+    row, col = move["path"][-1] # Current position of the piece
+    piece = board[row][col] # Determine the piece
+    path = move["path"]
+    captures = move["captures"]
+    player = piece_owner(piece) # Determine the player
+
+    moves = [] # To store moves
+
+    # Iterate over movement directions for the piece to generate possible capture moves
+    for row_change, col_change in movement_directions(piece):
+        
+        # Compute jumped row and col, and landing rown and col after possible capturing
+        jumped_row = row + row_change # for opponent piece
+        jumped_col = col + col_change # for opponent piece
+
+        landing_row = row + (2 * row_change) # for moving piece
+        landing_col = col + (2 * col_change) # for moving  piece
+        
+        # Check whether landing point is inside the board
+        if not inside_board(landing_row, landing_col):
+            continue
+
+        # Determine opponent piece and landing point for the moving piece
+        jumped_piece = board[jumped_row][jumped_col] 
+        landing_piece = board[landing_row][landing_col]
+
+        # Check if capturing opponent piece or landing point is empty
+        if piece_owner(jumped_piece) != -player or landing_piece != EMPTY:
+            continue
+
+        # New board state after capturing     
+        new_board = [row[:] for row in board] # Copy the board
+
+        new_board[row][col] = EMPTY # Empty the starting point
+        new_board[jumped_row][jumped_col] = EMPTY # Empty the captured piece
+        new_board[landing_row][landing_col] = piece # Move the piece to landing point
+
+
+        # Add new path to path list, and capture moves to capture list
+        new_path = path + [(landing_row, landing_col)]
+        new_captures = captures + [(jumped_row, jumped_col)]
+
+        # Check if capturing lead to 'regicide'
+        # IF it is a normal piece, and capturing a king 
+        normal_piece_to_regicide = abs(piece) == 1 and abs(jumped_piece) == 2
+
+        # if normal piece reach the king row during a capture
+        normal_piece_to_promote = check_promote(piece, landing_row)
+
+        # If 'regicide' occurs, create the new move and append to 'moves' list
+        # Stop capturing 
+        if normal_piece_to_regicide:
+            moves.append(make_move(new_path, new_captures, regicide=True, promotes=True))
+            continue
+
+        # If 'promote' occurs, create the new move and append to 'moves' list
+        # Stop capturing 
+        if normal_piece_to_promote:
+            moves.append(make_move(new_path, new_captures, regicide=False, promotes=True))
+            continue
+        
+        new_move = make_move(new_path, new_captures)
+        
+        # Check if there anymore possible capturing recursively
+        # Every time the piece capturing, continue searching from the new landing point     
+        continue_moves = find_piece_captures(new_board, new_move)
+
+        # IF another captures available, extend the 'moves' list for every possible capturing
+        if continue_moves:
+            moves.extend(continue_moves)
+        # Otherwise, only append the capture to the 'moves' list
+        else:
+            moves.append(new_move)
+
+    return moves
+
+# Returns all legal moves for a player
+def all_legal_moves(board, player):
+
+    capture_moves = [] # To store capture moves
+    normal_moves = [] # To store normal moves
+
+    # Iterate through the board rows and cols
+    for row in range(BOARD_SIZE):
+        for col in range(BOARD_SIZE):
+
+            piece = board[row][col] # Determine the possible piece
+
+            # Check if piece belongs to player
+            if piece_owner(piece) != player:
+                continue
+            
+            start_move = make_move([(row, col)], [])
+
+            # Find possible capture moves
+            captures = find_piece_captures(board, start_move)
+
+            # If any possible capture, extend 'capture_moves' list
+            if captures:
+                capture_moves.extend(captures)
+            # Otherwise find normal moves and extend 'normal_moves' list
+            else:
+                normal_moves.extend(find_piece_normal_moves(board, start_move))
+
+    # If at least one capture exists, only return 'capture_moves' list
+    if capture_moves:
+        return capture_moves
+
+    # Otherwise return 'normal_moves' list
+    return normal_moves

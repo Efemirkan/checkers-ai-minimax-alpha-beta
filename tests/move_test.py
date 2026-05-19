@@ -3,7 +3,7 @@ import os
 
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
-from moves import find_piece_normal_moves
+from moves import find_piece_normal_moves, make_move
 from constants import *
 
 # Test; Black opening moves
@@ -12,7 +12,9 @@ def test_black_opening_moves():
     board = initial_board
     board[2][3] = BLACK  # Start position
 
-    moves = find_piece_normal_moves(board, 2, 3)
+    start_move = make_move([(2, 3)], [])
+
+    moves = find_piece_normal_moves(board, start_move)
     paths = [m["path"] for m in moves]
 
     # Black moves down
@@ -33,7 +35,9 @@ def test_white_opening_moves():
     board = initial_board
     board[5][4] = WHITE  # Start position
 
-    moves = find_piece_normal_moves(board, 5, 4)
+    start_move = make_move([(5, 4)], [])
+
+    moves = find_piece_normal_moves(board, start_move)
     paths = [m["path"] for m in moves]
 
     # White moves up
@@ -54,7 +58,8 @@ def test_king_moves():
     board = initial_board
     board[3][3] = BLACK_KING
 
-    moves = find_piece_normal_moves(board, 3, 3)
+    start_move = make_move([(3, 3)], [])
+    moves = find_piece_normal_moves(board, start_move)
 
     directions = []
     for move in moves:
