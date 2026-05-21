@@ -15,6 +15,8 @@ initial_board = [[0, 1, 0, 1, 0, 1, 0, 1],
 # BLACK starts first
 initial_state = (initial_board, BLACK)
 
+def empty_board():
+    return [[EMPTY for col in range(BOARD_SIZE)] for row in range(BOARD_SIZE)]
 
 # To check row and column are on the board
 def inside_board(row, col):

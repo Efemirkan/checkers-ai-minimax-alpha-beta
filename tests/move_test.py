@@ -4,12 +4,13 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 from moves import find_piece_normal_moves, make_move
+from board import empty_board
 from constants import *
 
 # Test; Black opening moves
 def test_black_opening_moves():
 
-    board = initial_board
+    board = empty_board()
     board[2][3] = BLACK  # Start position
 
     start_move = make_move([(2, 3)], [])
@@ -32,7 +33,7 @@ def test_black_opening_moves():
 # Test; White opening moves
 def test_white_opening_moves():
     
-    board = initial_board
+    board = empty_board()
     board[5][4] = WHITE  # Start position
 
     start_move = make_move([(5, 4)], [])
@@ -55,7 +56,7 @@ def test_white_opening_moves():
 # Test; Kings moves
 def test_king_moves():
 
-    board = initial_board
+    board = empty_board()
     board[3][3] = BLACK_KING
 
     start_move = make_move([(3, 3)], [])

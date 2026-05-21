@@ -172,3 +172,58 @@ def all_legal_moves(board, player):
 
     # Otherwise return 'normal_moves' list
     return normal_moves
+
+# Define apply_move_to_board function
+# To apply the move into board to return the new board
+def apply_move_to_board(board, move):
+    
+    # Copy to board
+    new_board = [row[:] for row in board]
+
+    # Extract start and end, rows and cols
+    start_row, start_col = move["path"][0]
+    end_row, end_col = move["path"][-1]
+
+    # Create the piece and find the player
+    piece = new_board[start_row][start_col]
+    player = piece_owner(piece)
+
+    # Remove the moving piece from starting point
+    new_board[start_row][start_col] = EMPTY
+
+    # Remove all captured enemies
+    for captured_row, captured_col in move["captures"]:      
+        new_board[captured_row][captured_col] = EMPTY
+
+    # If the move promotion, upgrade the piece with a king
+    # This covers promotion and the regicide
+    if move["promotes"]:
+        piece = 2 * player
+
+    # Put the piece on end point
+    new_board[end_row][end_col] = piece
+
+    return new_board
+
+# Returns successors pair (move, state)
+# To determine what board state that move creates
+def compute_successor_pairs(state):
+
+    board, player = state # Unpack board and player
+
+    # Compute all possible legal moves
+    legal_moves = all_legal_moves(board, player)
+
+    successor_pairs = [] # To store pairs
+
+    # Iterate over legal_moves
+    for move in legal_moves:
+
+        new_board = apply_move_to_board(board, move) # Determine new board after move
+        next_player = -player # Change the plater
+        new_state = (new_board, next_player) # Determine new state
+
+        # Append (move, new_state) pairs to 'successor_pairs' list
+        successor_pairs.append((move, new_state))
+
+    return successor_pairs
