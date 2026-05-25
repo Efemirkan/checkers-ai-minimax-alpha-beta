@@ -1,20 +1,5 @@
 from constants import *
 
-### INITIALISE BOARD AND STATE ###
-initial_board = [[0, 1, 0, 1, 0, 1, 0, 1],
-                 [1, 0, 1, 0, 1, 0, 1, 0],
-                 [0, 1, 0, 1, 0, 1, 0, 1],
-                 [0, 0, 0, 0, 0, 0, 0, 0],
-                 [0, 0, 0, 0, 0, 0, 0, 0],
-                 [-1, 0, -1, 0, -1, 0, -1, 0],
-                 [0, -1, 0, -1, 0, -1, 0, -1],
-                 [-1, 0, -1, 0, -1, 0, -1, 0]]
-
-# The state stores:
-# (board, player_to_move)
-# BLACK starts first
-initial_state = (initial_board, BLACK)
-
 def empty_board():
     return [[EMPTY for col in range(BOARD_SIZE)] for row in range(BOARD_SIZE)]
 
@@ -45,6 +30,23 @@ def count_player_pieces(board, player):
             # Check if piece belongs the player
             if piece_owner(board[row][col]) == player:
                 count += 1  # Increase by one
+    return count
+
+# To count how many king a player has
+def count_player_kings(board, player):
+
+    count = 0 # Initialize count as 0
+  
+    # Iterate through the board rows and cols
+    for row in range(BOARD_SIZE):
+        for col in range(BOARD_SIZE):
+            
+            piece = board[row][col]
+
+            # Check if piece belongs the player 
+            if piece_owner(piece) == player and abs(piece) == 2:
+                count += 1 # Increase by one
+                
     return count
 
 # To check the piece to be promoted on the row
