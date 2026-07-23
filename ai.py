@@ -1,6 +1,7 @@
 from constants import *
 from rules import game_ending
 import random
+from moves import compute_successor_pairs
 
 # To score the player using piece values
 # Normal pieces 100, Kings 175
